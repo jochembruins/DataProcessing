@@ -1,0 +1,1 @@
+What is a so called “branch” in Git terms and why would you use it?
