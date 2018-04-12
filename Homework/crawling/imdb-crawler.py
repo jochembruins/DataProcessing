@@ -148,8 +148,8 @@ def main():
             make_backup(html_file, movie_html)
 
     # Save a CSV file with the relevant information for the top 250 movies.
-  #  print('Saving CSV ...')
-   # save_csv(os.path.join(SCRIPT_DIR, 'top250movies.csv'), rows)
+    print('Saving CSV ...')
+    save_csv(os.path.join(SCRIPT_DIR, 'top250movies.csv'), rows)
 
 
 # --------------------------------------------------------------------------
@@ -166,10 +166,12 @@ def scrape_top_250(soup):
         part, the domain part and the path part).
     """
     movie_urls = []
+    
     # YOUR SCRAPING CODE GOES HERE, ALL YOU ARE LOOKING FOR ARE THE ABSOLUTE
     # URLS TO EACH MOVIE'S IMDB PAGE, ADD THOSE TO THE LIST movie_urls.
     #movie_urls = soup.find_all("td", class_="titleColumn")
 
+    # get 
     movies = soup.tbody.find_all("td", class_="titleColumn")
 
     for movie in movies:
@@ -195,7 +197,70 @@ def scrape_movie_page(dom):
     # YOUR SCRAPING CODE GOES HERE:
     # Return everything of interest for this movie (all strings as specified
     # in the docstring of this function).
-    return 
+
+    film = dom.find("div", id="title-overview-widget")
+
+    # extract title
+    title = film.find("div", id="star-rating-widget")['data-title']
+
+
+    # extract runtime
+    runtime = film.time['datetime']
+    runtime = int(re.sub('[^0-9]', '', runtime))
+
+    # extract genres
+    genres = film.find_all("span", itemprop="genre")
+
+    genre_list = []
+
+    for genre in genres:
+        genre_list.append(genre.text)
+
+    # seperate genres with ;
+    genre = ";".join(genre_list)
+
+    # extract directors
+    directors = film.find_all("span", itemprop="director")
+
+    director_list = []
+
+    for director in directors:
+        director = director.text.strip().strip(',')
+        director_list.append(director)
+
+    # seperate directors with ;
+    director = ";".join(director_list)
+
+    # extract writors
+    writers = film.find_all("span", itemprop="creator")
+
+    writer_list = []
+
+    for writer in writers:
+        writer_list.append(writer.a.text)
+
+    # seperate genres with ;
+    writer = ";".join(writer_list)
+
+    # extract actors
+    actors = film.find_all("span", itemprop="actors")
+
+    actors_list = []
+
+    for actor in actors:
+        actor = actor.text.strip().strip(',')
+        actors_list.append(actor)
+
+    # seperate genres with ;
+    actor = ";".join(actors_list)
+    
+    # extract rating
+    rating = film.find("span", itemprop="ratingValue").text
+
+    # extract total of ratings
+    ratingCount = film.find("span", itemprop="ratingCount").text.replace(',', '')
+
+    return [str(title), int(runtime), str(genre), str(director), str(writer), str(actor), float(rating), int(ratingCount)]
 
 
 if __name__ == '__main__':
