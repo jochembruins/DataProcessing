@@ -171,11 +171,14 @@ def scrape_top_250(soup):
     # URLS TO EACH MOVIE'S IMDB PAGE, ADD THOSE TO THE LIST movie_urls.
     #movie_urls = soup.find_all("td", class_="titleColumn")
 
-    # get 
+    # get relevant part of the page with all the links
     movies = soup.tbody.find_all("td", class_="titleColumn")
 
+    # loop to go through all the links
     for movie in movies:
+        # make useable link
         movie = 'https://www.imdb.com' + movie.a['href']
+        # append them to a list
         movie_urls.append(movie)
 
     return movie_urls
@@ -198,67 +201,94 @@ def scrape_movie_page(dom):
     # Return everything of interest for this movie (all strings as specified
     # in the docstring of this function).
 
-    film = dom.find("div", id="title-overview-widget")
+    # extract part that contains all relevant information
+    try:
+        film = dom.find("div", id="title-overview-widget")
+    except:
+        print('information not available')
 
     # extract title
-    title = film.find("div", id="star-rating-widget")['data-title']
-
+    try:
+        title = film.find("div", id="star-rating-widget")['data-title']
+    except:
+        title = 'no title'
 
     # extract runtime
-    runtime = film.time['datetime']
-    runtime = int(re.sub('[^0-9]', '', runtime))
+    try:
+        runtime = film.time['datetime']
+        runtime = int(re.sub('[^0-9]', '', runtime))
+    except:
+        runtime = 'no runtime'
 
-    # extract genres
-    genres = film.find_all("span", itemprop="genre")
+    # extract genres into list
+    try:
+        genres = film.find_all("span", itemprop="genre")
 
-    genre_list = []
+        genre_list = []
 
-    for genre in genres:
-        genre_list.append(genre.text)
+        for genre in genres:
+            genre_list.append(genre.text)
 
-    # seperate genres with ;
-    genre = ";".join(genre_list)
+        # seperate genres with ; into a string
+        genre = ";".join(genre_list)
+    except:
+        genre = 'no genre' 
 
-    # extract directors
-    directors = film.find_all("span", itemprop="director")
+    # extract directors into  list
+    try:
+        directors = film.find_all("span", itemprop="director")
 
-    director_list = []
+        director_list = []
 
-    for director in directors:
-        director = director.text.strip().strip(',')
-        director_list.append(director)
+        for director in directors:
+            director = director.span.text.strip().strip(',')
+            director_list.append(director)
 
-    # seperate directors with ;
-    director = ";".join(director_list)
+        # seperate directors with ; in string
+        director = ";".join(director_list)
+    except:
+        director = 'no director'
 
-    # extract writors
-    writers = film.find_all("span", itemprop="creator")
+    # extract writors into list
+    try:
+        writers = film.find_all("span", itemprop="creator")
 
-    writer_list = []
+        writer_list = []
 
-    for writer in writers:
-        writer_list.append(writer.a.text)
+        for writer in writers:
+            writer_list.append(writer.a.text)
 
-    # seperate genres with ;
-    writer = ";".join(writer_list)
+        # seperate genres with ; in string
+        writer = ";".join(writer_list)
+    except:
+        writer = 'no writer'
 
-    # extract actors
-    actors = film.find_all("span", itemprop="actors")
+    # extract actors into list
+    try:
+        actors = film.find_all("span", itemprop="actors")
 
-    actors_list = []
+        actors_list = []
 
-    for actor in actors:
-        actor = actor.text.strip().strip(',')
-        actors_list.append(actor)
+        for actor in actors:
+            actor = actor.text.strip().strip(',')
+            actors_list.append(actor)
 
-    # seperate genres with ;
-    actor = ";".join(actors_list)
+        # seperate genres with ; in string
+        actor = ";".join(actors_list)
+    except:
+        actors = 'no actors'
     
     # extract rating
-    rating = film.find("span", itemprop="ratingValue").text
+    try:
+        rating = film.find("span", itemprop="ratingValue").text
+    except:
+        rating = 'no rating'
 
     # extract total of ratings
-    ratingCount = film.find("span", itemprop="ratingCount").text.replace(',', '')
+    try:
+        ratingCount = film.find("span", itemprop="ratingCount").text.replace(',', '')
+    except:
+        ratingCount = 'no ratingcount'
 
     return [str(title), int(runtime), str(genre), str(director), str(writer), str(actor), float(rating), int(ratingCount)]
 
