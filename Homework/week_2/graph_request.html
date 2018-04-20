@@ -29,13 +29,13 @@
 	var xhttp = new XMLHttpRequest();
 	xhttp.open("GET", 'KNMI_Data.txt', true);
 	xhttp.send()
-    
-    // check if state and status are correct
-    xhttp.onreadystatechange = function() {
-    	if (this.readyState == 4 && this.status == 200) {
-	       
-	       	// store requested data
-	    	var data = xhttp.responseText   
+
+	// check if state and status are correct
+	xhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+
+			// store requested data
+			var data = xhttp.responseText   
 
 			// split by line and make array
 			data = data.split('\n');
@@ -49,20 +49,20 @@
 				data[i] = data[i].split(',');
 
 				// subtract data needed to get date in right format
-				let year        = data[i][0].substring(0,4);
-				let month       = data[i][0].substring(4,6);
-				let day         = data[i][0].substring(6,8);
+				let year = data[i][0].substring(0,4);
+				let month = data[i][0].substring(4,6);
+				let day = data[i][0].substring(6,8);
 
 				// convert date to specific js format
-				let date        = new Date(year, month-1, day);
-				let dateTime	= date.getTime();
+				let date = new Date(year, month-1, day);
+				let dateTime = date.getTime();
 				
 				// add data to list
 				dataPoints.push({ 
 					date: date,
 					dateTime: dateTime,
 					dateNumber: 0,
-					temp: Number(data[i][1])	
+					temp: Number(data[i][1])
 				})
 			}
 			
@@ -75,19 +75,19 @@
 			
 			// loop through the data to find min and max
 			for (var i = 0 ; i < dataPoints.length; i++) {
-		    	tmp = dataPoints[i];
-		    	if (tmp.dateTime < dateMin) {
-		    		dateMin= tmp.dateTime;
-		    	}
-		    	if (tmp.dateTime > dateMax) {
-		    		dateMax = tmp.dateTime;
-		    	}	
-		    	if (tmp.temp < tempMin) {
-		    		tempMin= tmp.temp;
-		    	}
-		    	if (tmp.temp > tempMax) {
-		    		tempMax = tmp.temp;
-		    	}	
+				tmp = dataPoints[i];
+				if (tmp.dateTime < dateMin) {
+					dateMin= tmp.dateTime;
+				}
+				if (tmp.dateTime > dateMax) {
+					dateMax = tmp.dateTime;
+				}	
+				if (tmp.temp < tempMin) {
+					tempMin= tmp.temp;
+				}
+				if (tmp.temp > tempMax) {
+					tempMax = tmp.temp;
+				}	
 			}
 
 			// get amount of miliseconds in one day	
@@ -132,9 +132,9 @@
 				// draw labels
 				if (i != months) {
 					ctx.font = '13px Arial';
-			    	ctx.textAlign = 'center';
-			    	ctx.fillText(monthNames[i], margin + 0.5 * xTicksDist + xTicksDist * i, canvas.height - margin + distanceToXTicks);
-			    }	
+					ctx.textAlign = 'center';
+					ctx.fillText(monthNames[i], margin + 0.5 * xTicksDist + xTicksDist * i, canvas.height - margin + distanceToXTicks);
+				}	
 			}
 
 			// draw y-axis
@@ -151,10 +151,10 @@
 				ctx.lineTo(margin + 3, margin + yTicksDist * i);
 				ctx.stroke();
 
-			    // draw labels
-			    ctx.font = '11px Arial';
-			    ctx.textAlign = 'right';
-			    ctx.fillText(highestScreenTemp - i * 50, margin - distanceToYTicks, margin + yTicksDist * i + 2);
+				// draw labels
+				ctx.font = '11px Arial';
+				ctx.textAlign = 'right';
+				ctx.fillText(highestScreenTemp - i * 50, margin - distanceToYTicks, margin + yTicksDist * i + 2);
 			}
 
 			// set variables that corrects y-axis and data min and max
@@ -174,7 +174,7 @@
 			// draw graph line
 			ctx.beginPath();
 			ctx.strokeStyle = "#b10000";
-		    ctx.lineWidth = 1.3;
+			ctx.lineWidth = 1.3;
 			ctx.moveTo(dateTransform(dataPoints[0].dateNumber), tempTransform(dataPoints[0].temp));
 			
 			// loop to draw to a point that represents the temperature on that day 
@@ -185,33 +185,32 @@
 
 			// add titles to graph
 			ctx.font = "20px Arial";
-		    ctx.textAlign = "center";
-		    ctx.fillText("De Bilt - Gemiddelde temperatuur 2017", 0.5 * canvas.width, margin / 2);
-		    ctx.fillText("Maand", 0.5 * canvas.width, canvas.height - margin / 2)
-		    ctx.rotate(-Math.PI/2);
-		    ctx.fillText("Temperatuur per 0.1°C", canvas.height / -2, margin / 2);
+			ctx.textAlign = "center";
+			ctx.fillText("De Bilt - Gemiddelde temperatuur 2017", 0.5 * canvas.width, margin / 2);
+			ctx.fillText("Maand", 0.5 * canvas.width, canvas.height - margin / 2)
+			ctx.rotate(-Math.PI/2);
+			ctx.fillText("Temperatuur per 0.1°C", canvas.height / -2, margin / 2);
 			
 			function createTransform(domain, range){
-				// domain is a two-element array of the data bounds [domain_min, domain_max]
-				// range is a two-element array of the screen bounds [range_min, range_max]
+			// domain is a two-element array of the data bounds [domain_min, domain_max]
+			// range is a two-element array of the screen bounds [range_min, range_max]
 				
-			    var domain_min = domain[0]
-			    var domain_max = domain[1]
-			    var range_min = range[0]
-			    var range_max = range[1]
+				var domain_min = domain[0]
+				var domain_max = domain[1]
+				var range_min = range[0]
+				var range_max = range[1]
 
-			    // formulas to calculate the alpha and the beta
-			   	var alpha = (range_max - range_min) / (domain_max - domain_min)
-			    var beta = range_max - alpha * domain_max
+				// formulas to calculate the alpha and the beta
+				var alpha = (range_max - range_min) / (domain_max - domain_min)
+				var beta = range_max - alpha * domain_max
 
-			    // returns the function for the linear transformation (y= a * x + b)
-			    return function(x){
-			      return alpha * x + beta;
-			    }
+				// returns the function for the linear transformation (y= a * x + b)
+				return function(x){
+				  return alpha * x + beta;
+				}
 			}
     	};
 	};
-
 </script>
 </body>
 </html>
