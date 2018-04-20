@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>Week 2: Weer</title>
+	<style type="text/css">
+		canvas {
+			border: 1px solid black;
+		}
+	</style>
+
+</head>
+<body>
+	<h1>Data Processing</h1>
+	<h2>
+	Jochem Bruins - 10578811 </br> Week 2: Weer </br> <a href="http://projects.knmi.nl/klimatologie/daggegevens/selectie.cgi">Bron: KNMI</a> </h2>
+<canvas id="myCanvas" width="1006" height="600">	
+</canvas>
+<script>
+
+	var xhttp = new XMLHttpRequest();
+	xhttp.open("GET", 'KNMI_Data.txt', true);
+	xhttp.send()
+    
+    xhttp.onreadystatechange = function() {
+    	if (this.readyState == 4 && this.status == 200) {
+	       // Typical action to be performed when the document is ready:
+	    	var data = xhttp.responseText   
+
+
+			data = data.split('\n');
+			console.log(data)
+
+			var dataPoints = []
+			
+			for(let i = 0; i < data.length - 1; i++){
+				data[i] = data[i].split(',')
+
+				let year        = data[i][0].substring(0,4);
+				let month       = data[i][0].substring(4,6);
+				let day         = data[i][0].substring(6,8);
+
+				let date        = new Date(year, month-1, day);
+				let dateTime	= date.getTime()
+				
+				
+				dataPoints.push({ 
+					date: date,
+					dateTime: dateTime,
+					dateNumber: 0,
+					temp: Number(data[i][1])	
+				})
+			}
+			console.log(dataPoints);
+
+			var dateMin = Number.POSITIVE_INFINITY;
+			var dateMax = Number.NEGATIVE_INFINITY;
+			var tempMin = Number.POSITIVE_INFINITY;
+			var tempMax = Number.NEGATIVE_INFINITY;
+			var tmp;
+			
+			for (var i = 0 ; i < dataPoints.length; i++) {
+		    	tmp = dataPoints[i];
+		    	if (tmp.dateTime < dateMin) {
+		    		dateMin= tmp.dateTime;
+		    	}
+		    	if (tmp.dateTime > dateMax) {
+		    		dateMax = tmp.dateTime;
+		    	}	
+		    	if (tmp.temp < tempMin) {
+		    		tempMin= tmp.temp;
+		    	}
+		    	if (tmp.temp > tempMax) {
+		    		tempMax = tmp.temp;
+		    	}	
+			}
+
+
+			console.log(dateMax, dateMin, tempMax, tempMin);
+			
+			daySec = (dateMax - dateMin) / 364
+
+			for (var i = 0 ; i < dataPoints.length; i++) {
+				dataPoints[i].dateNumber = Math.round(((dataPoints[i].dateTime - dateMin) / daySec + 1))
+			}
+			
+
+			var canvas = document.getElementById('myCanvas'); 
+			var ctx = canvas.getContext('2d');
+
+			var margin = 80
+			var months = 12
+			var xTicksDist = (canvas.width - margin * 2) / months
+			var yTicks = 6
+			var yTicksDist = (canvas.height - margin * 2) / yTicks
+			var lowestScreenTemp = -50
+			var highestScreenTemp = 250
+			var distanceToYTicks = 5
+			var distanceToXTicks = 15	
+			var tempSteps = 50
+			var monthNames = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+
+			// draw x axis
+			ctx.beginPath();
+			ctx.moveTo(margin, canvas.height - margin);
+			ctx.lineTo(canvas.width - margin, canvas.height - margin);
+			ctx.stroke();
+
+			// draw ticks on x-axis
+			for(i = 0; i <= months; i++) {
+				ctx.beginPath();
+				ctx.moveTo(margin + xTicksDist * i, canvas.height - margin - 3);
+				ctx.lineTo(margin + xTicksDist * i, canvas.height - margin + 3);
+				ctx.stroke();
+
+				if (i != months) {
+					ctx.font = '13px Arial';
+			    	ctx.textAlign = 'center';
+			    	ctx.fillText(monthNames[i], margin + 0.5 * xTicksDist + xTicksDist * i, canvas.height - margin + distanceToXTicks);
+			    }	
+			}
+
+			// draw y axis
+			ctx.beginPath();
+			ctx.moveTo(margin, margin);
+			ctx.lineTo(margin, canvas.height - margin);
+			ctx.stroke();
+
+			// draw ticks on y-axis
+			for(i = 0; i <= yTicks; i++) {
+				ctx.beginPath();
+				ctx.moveTo(margin - 3, margin + yTicksDist * i);
+				ctx.lineTo(margin + 3, margin + yTicksDist * i);
+				ctx.stroke();
+
+			    ctx.font = '11px Arial';
+			    ctx.textAlign = 'right';
+			    ctx.fillText(highestScreenTemp - i * 50, margin - distanceToYTicks, margin + yTicksDist * i + 2);
+			}
+
+
+			yBottomCorrection = tempMin - lowestScreenTemp
+			yTopCorrection = highestScreenTemp - tempMax
+
+			tempDomain = [tempMin, tempMax]
+			console.log(tempDomain)
+
+			tempRange = [canvas.height - margin - yBottomCorrection, margin + yTopCorrection]
+			console.log(tempRange)
+
+			dateDomain = [1, 365]
+			console.log(dateDomain)
+
+			dateRange = [margin, canvas.width - margin]
+			console.log(dateRange)
+
+			var tempTransform = createTransform(tempDomain, tempRange);
+			var dateTransform = createTransform(dateDomain, dateRange);
+			
+			// draw line
+			ctx.beginPath();
+			ctx.strokeStyle = "#b10000";
+		    ctx.lineWidth = 0.4;
+			ctx.moveTo(dateTransform(dataPoints[0].dateNumber), tempTransform(dataPoints[0].temp));
+			for (var i = 1 ; i < dataPoints.length; i++) {
+				ctx.lineTo(dateTransform(dataPoints[i].dateNumber), tempTransform(dataPoints[i].temp));
+				ctx.stroke();
+			}	
+
+			console.log('ikbenhier')
+			// add titles 
+			ctx.font = "20px Arial";
+		    ctx.textAlign = "center";
+		    ctx.fillText("De Bilt - Gemiddelde temperatuur 2017", 0.5 * canvas.width, margin / 2);
+		    ctx.fillText("Maand", 0.5 * canvas.width, canvas.height - margin / 2)
+		    ctx.rotate(-Math.PI/2);
+		    ctx.fillText("Temperatuur per 0.1°C", canvas.height / -2, margin / 2);
+			
+			function createTransform(domain, range){
+			// domain is a two-element array of the data bounds [domain_min, domain_max]
+			// range is a two-element array of the screen bounds [range_min, range_max]
+			// this gives you two equations to solve:
+			// range_min = alpha * domain_min + beta
+			// range_max = alpha * domain_max + beta
+		 		// a solution would be:
+
+			    var domain_min = domain[0]
+			    var domain_max = domain[1]
+			    var range_min = range[0]
+			    var range_max = range[1]
+
+			    // formulas to calculate the alpha and the beta
+			   	var alpha = (range_max - range_min) / (domain_max - domain_min)
+			    var beta = range_max - alpha * domain_max
+
+			    // returns the function for the linear transformation (y= a * x + b)
+			    return function(x){
+			      return alpha * x + beta;
+				}
+			}
+    	};
+	};
+
+</script>
+</body>
+</html>
