@@ -14,7 +14,6 @@
 	<h1>Data Processing</h1>
 	<h2>
 	Jochem Bruins - 10578811 </br> Week 2: Weer </br> <a href="http://projects.knmi.nl/klimatologie/daggegevens/selectie.cgi">Bron: KNMI</a> </h2>
-
 <textarea id="rawdata" style="display: none;">
 20170101,    5
 20170102,   30
@@ -386,22 +385,35 @@
 	
 </canvas>
 <script>
+	/**
+	* Jochem Bruins - 10578811
+	*
+	* Script that draws a graph of the average temperature in De Bilt in 2017.
+	**/
+
+	// get data by id
 	let data = document.getElementById("rawdata").innerHTML
+	
+	// split by line and make array
 	data = data.split('\n');
 
+	// create empty list to store dicts
 	var dataPoints = []
 	
+	// loop to go trough all the data
 	for(let i = 0; i < data.length - 1; i++){
-		data[i] = data[i].split(',')
+		data[i] = data[i].split(',');
 
+		// subtract data needed to get date in right format
 		let year        = data[i][0].substring(0,4);
 		let month       = data[i][0].substring(4,6);
 		let day         = data[i][0].substring(6,8);
 
+		// convert date to specific js format
 		let date        = new Date(year, month-1, day);
-		let dateTime	= date.getTime()
+		let dateTime	= date.getTime();
 		
-		
+		// add data to list
 		dataPoints.push({ 
 			date: date,
 			dateTime: dateTime,
@@ -409,14 +421,15 @@
 			temp: Number(data[i][1])	
 		})
 	}
-	console.log(dataPoints);
-
+	
+	// make variables to get date and temperature min and max
 	var dateMin = Number.POSITIVE_INFINITY;
 	var dateMax = Number.NEGATIVE_INFINITY;
 	var tempMin = Number.POSITIVE_INFINITY;
 	var tempMax = Number.NEGATIVE_INFINITY;
 	var tmp;
 	
+	// loop through the data to find min and max
 	for (var i = 0 ; i < dataPoints.length; i++) {
     	tmp = dataPoints[i];
     	if (tmp.dateTime < dateMin) {
@@ -433,25 +446,25 @@
     	}	
 	}
 
-
-	console.log(dateMax, dateMin, tempMax, tempMin);
-	
+	// get amount of miliseconds in one day	
 	daySec = (dateMax - dateMin) / 364
 
+	// set dateNumber variable that ranks the days of the year from 1 to 365
 	for (var i = 0 ; i < dataPoints.length; i++) {
 		dataPoints[i].dateNumber = Math.round(((dataPoints[i].dateTime - dateMin) / daySec + 1))
 	}
 	
-
+	// link script to canvas element in body
 	var canvas = document.getElementById('myCanvas'); 
 	var ctx = canvas.getContext('2d');
 
+	// set variables that help building the graph
 	var margin = 80
 	var months = 12
 	var xTicksDist = (canvas.width - margin * 2) / months
 	var yTicks = 6
 	var yTicksDist = (canvas.height - margin * 2) / yTicks
-	var lowestScreenTemp = -50
+	var lowestScreenTemp = - 50
 	var highestScreenTemp = 250
 	var distanceToYTicks = 5
 	var distanceToXTicks = 15	
@@ -464,13 +477,15 @@
 	ctx.lineTo(canvas.width - margin, canvas.height - margin);
 	ctx.stroke();
 
-	// draw ticks on x-axis
+	// draw ticks and labels on x-axis
 	for(i = 0; i <= months; i++) {
+		// draw ticks
 		ctx.beginPath();
 		ctx.moveTo(margin + xTicksDist * i, canvas.height - margin - 3);
 		ctx.lineTo(margin + xTicksDist * i, canvas.height - margin + 3);
 		ctx.stroke();
 
+		// draw labels
 		if (i != months) {
 			ctx.font = '13px Arial';
 	    	ctx.textAlign = 'center';
@@ -478,55 +493,53 @@
 	    }	
 	}
 
-	// draw y axis
+	// draw y-axis
 	ctx.beginPath();
 	ctx.moveTo(margin, margin);
 	ctx.lineTo(margin, canvas.height - margin);
 	ctx.stroke();
 
-	// draw ticks on y-axis
+	// draw ticks and labales on y-axis
 	for(i = 0; i <= yTicks; i++) {
+		// draw ticks
 		ctx.beginPath();
 		ctx.moveTo(margin - 3, margin + yTicksDist * i);
 		ctx.lineTo(margin + 3, margin + yTicksDist * i);
 		ctx.stroke();
 
+	    // draw labels
 	    ctx.font = '11px Arial';
 	    ctx.textAlign = 'right';
 	    ctx.fillText(highestScreenTemp - i * 50, margin - distanceToYTicks, margin + yTicksDist * i + 2);
 	}
 
-
+	// set variables that corrects y-axis and data min and max
 	yBottomCorrection = tempMin - lowestScreenTemp
 	yTopCorrection = highestScreenTemp - tempMax
 
+	// set variables that are used in createTransform Function
 	tempDomain = [tempMin, tempMax]
-	console.log(tempDomain)
-
 	tempRange = [canvas.height - margin - yBottomCorrection, margin + yTopCorrection]
-	console.log(tempRange)
-
 	dateDomain = [1, 365]
-	console.log(dateDomain)
-
 	dateRange = [margin, canvas.width - margin]
-	console.log(dateRange)
 
+	// create two functions with createTransform
 	var tempTransform = createTransform(tempDomain, tempRange);
 	var dateTransform = createTransform(dateDomain, dateRange);
 	
-	// draw line
+	// draw graph line
 	ctx.beginPath();
 	ctx.strokeStyle = "#b10000";
     ctx.lineWidth = 0.4;
 	ctx.moveTo(dateTransform(dataPoints[0].dateNumber), tempTransform(dataPoints[0].temp));
+	
+	// loop to draw to a point that represents the temperature on that day 
 	for (var i = 1 ; i < dataPoints.length; i++) {
 		ctx.lineTo(dateTransform(dataPoints[i].dateNumber), tempTransform(dataPoints[i].temp));
 		ctx.stroke();
 	}	
 
-	console.log('ikbenhier')
-	// add titles 
+	// add titles to graph
 	ctx.font = "20px Arial";
     ctx.textAlign = "center";
     ctx.fillText("De Bilt - Gemiddelde temperatuur 2017", 0.5 * canvas.width, margin / 2);
@@ -535,26 +548,22 @@
     ctx.fillText("Temperatuur per 0.1°C", canvas.height / -2, margin / 2);
 	
 	function createTransform(domain, range){
-	// domain is a two-element array of the data bounds [domain_min, domain_max]
-	// range is a two-element array of the screen bounds [range_min, range_max]
-	// this gives you two equations to solve:
-	// range_min = alpha * domain_min + beta
-	// range_max = alpha * domain_max + beta
- 		// a solution would be:
+		// domain is a two-element array of the data bounds [domain_min, domain_max]
+		// range is a two-element array of the screen bounds [range_min, range_max]
+		
+	    var domain_min = domain[0]
+	    var domain_max = domain[1]
+	    var range_min = range[0]
+	    var range_max = range[1]
 
-    var domain_min = domain[0]
-    var domain_max = domain[1]
-    var range_min = range[0]
-    var range_max = range[1]
+	    // formulas to calculate the alpha and the beta
+	   	var alpha = (range_max - range_min) / (domain_max - domain_min)
+	    var beta = range_max - alpha * domain_max
 
-    // formulas to calculate the alpha and the beta
-   	var alpha = (range_max - range_min) / (domain_max - domain_min)
-    var beta = range_max - alpha * domain_max
-
-    // returns the function for the linear transformation (y= a * x + b)
-    return function(x){
-      return alpha * x + beta;
-    }
+	    // returns the function for the linear transformation (y= a * x + b)
+	    return function(x){
+	      return alpha * x + beta;
+	 }
 }
 </script>
 </body>
