@@ -10,10 +10,10 @@ import csv
 import json
 
 # open CSV  
-csvfile = open('Gezondheidsmonitor_overgewicht.csv', 'r', encoding='utf-8-sig')  
+csvfile = open('Gezondheidsmonitor_overgewicht.csv', 'r', encoding = 'utf-8-sig')  
 
 # declare field names
-reader = csv.DictReader(csvfile, delimiter=';', fieldnames = ("provincie", "ondergewicht", "normaal gewicht", "overgewicht", "matig overgewicht", "ernstig overgewicht"))  
+reader = csv.DictReader(csvfile, delimiter = ';', fieldnames = ("provincie", "ondergewicht", "normaal gewicht", "overgewicht", "matig overgewicht", "ernstig overgewicht"))  
 
 # parse CSV into JSON  
 output = json.dumps([row for row in reader])  

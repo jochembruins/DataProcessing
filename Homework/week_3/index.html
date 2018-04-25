@@ -4,12 +4,53 @@
         <meta charset="utf-8">
         <title>D3 test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
+        <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+        <style>
+            .d3-tip {
+              line-height: 1;
+              font-weight: bold;
+              padding: 12px;
+              background: rgba(0, 0, 0, 0.8);
+              color: #fff;
+              border-radius: 2px;
+            }
+
+            /* Creates a small triangle extender for the tooltip */
+            .d3-tip:after {
+              box-sizing: border-box;
+              display: inline;
+              font-size: 10px;
+              width: 100%;
+              line-height: 1;
+              color: rgba(0, 0, 0, 0.8);
+              content: "\25BC";
+              position: absolute;
+              text-align: center;
+            }
+
+            /* Style northward tooltips differently */
+            .d3-tip.n:after {
+              margin: -1px 0 0 0;
+              top: 100%;
+              left: 0;
+            }
+            
+            .bar {
+                fill: rgb(4, 90, 141);
+            }
+
+            .bar:hover {
+                fill: rgb(116, 169, 207);
+            }
+
+        </style>   
     </head>
     <body>
         <script type="text/javascript">
             d3.select("body")
                 .append("h1")
-                .text("Jochem Bruins - 10578811");
+                .text("Jochem Bruins - 10578811")
+                .style("font-size","34px");
 
             d3.select("body")
                 .append("h2")
@@ -20,7 +61,126 @@
 
             d3.select("body")
                 .append("p")
-                .text("Deze grafiek toon het percentage overgewicht per provincie. De data komt van het CBS. ZIj registreren ook ondergewicht en de mate van overgewicht.");
+                .text("Deze grafiek toon het percentage ernstig overgewicht (BMI > 30,0 kg/m2) per provincie. De data komt van het CBS. Zij registreren niet alleen ondergewicht, maar ook normaal- en ondergewicht.");
+            
+            d3.selectAll("body")
+                .style("font-family", "arial");
+
+            data = []       
+            d3.json("Gezondheidsmonitor_overgewicht.json", function(error, data) {
+                dataset = data.data;
+
+
+                console.log(dataset);
+
+                //Width and height
+                var width = 800;
+                var height = 600;
+                var padding = 12
+                var scale = 20
+                var marginLeft = 60
+                var marginBottom = 100
+                var marginRight = 60
+                var marginTop = 60
+
+                
+                var barDist = (width - marginLeft - marginRight) / dataset.length 
+
+
+                var svg = d3.select("body")
+                    .append("svg")
+                    .attr("width", width)
+                    .attr("height", height);
+
+                var y = d3.scale.linear()
+                    .domain([0, d3.max(dataset, function(d) { 
+                            return +d["ernstig overgewicht"];})])
+                    .range([height - marginBottom, 0 + marginTop]);
+
+                var x = d3.scale.ordinal()
+                    x.domain(dataset.map(function(d) { 
+                        return d.provincie; 
+                        }))
+                    .rangeRoundBands([0 + marginLeft - padding, width -marginRight], 0.1);
+   
+                //Define Y axis
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left")
+                    .outerTickSize(2)
+                    .ticks(5)
+                    .tickFormat(d => d + "%")
+
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .outerTickSize(2)
+                    .orient("bottom");
+
+                var tip = d3.tip()
+                      .attr('class', 'd3-tip')
+                      .offset([-10, 0])
+                      .html(function(d) {
+                        return "<span>" + d["ernstig overgewicht"] + "%</span>";
+                      });
+
+                svg.call(tip);
+
+                var rects = svg.selectAll("rect")
+                    .data(dataset)
+                    .enter()
+                    .append("rect")
+                    .attr('class', 'bar')
+                    .attr("width", (width - marginLeft - marginRight - padding * dataset.length - 1) / dataset.length  )
+                    .attr("height", function(d) {
+                            return (height - marginBottom) - y(d["ernstig overgewicht"]);  
+                        })
+                    .attr("x", function(d, i) {
+                        return marginLeft + (i * barDist);
+                        })
+                    .attr("y", function(d) {
+                        return y(d["ernstig overgewicht"]); 
+                        })
+                    .on('mouseover', tip.show)
+                    .on('mouseout', tip.hide);
+
+                //Create Y axis
+                svg.append("g")
+                    .attr("class", "axis")
+                    .attr("transform", "translate(" + (marginLeft - 10) + ",0)")
+                    .call(yAxis);
+
+                
+                svg.append("g")
+                    .attr("class", "xAxis")
+                    .attr("transform", "translate(0," + (height - marginBottom)  + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+                    .attr("y", 12)
+                    .attr("x", 2)
+                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(45)")
+                    .style("text-anchor", "start")
+
+                // source
+                var title = svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y", marginTop / 2)
+                    .text("Percentage ernstig overgewicht per provincie")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "25px");
+                    // .style("font-weight", "bold");
+
+                
+                var borderPath = svg.append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("height", height)
+                    .attr("width", width)
+                    .style("stroke", "grey")
+                    .style("fill", "none")
+                    .style("stroke-width", "1px");    
+
+            });
 
         </script>
     </body>
