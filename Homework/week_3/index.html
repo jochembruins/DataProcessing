@@ -6,6 +6,7 @@
         <script type="text/javascript" src="d3/d3.v3.js"></script>
         <script type="text/javascript" src="d3/d3.tip.v0.6.3.js"></script>
         <style>
+            /* D3 tip. insired by http://bl.ocks.org/Caged/6476579*/
             .d3-tip {
               line-height: 1;
               font-weight: bold;
@@ -35,10 +36,13 @@
               left: 0;
             }
             
+            /* Bar when mouse is off */
             .bar {
                 fill: rgb(4, 90, 141);
             }
 
+            
+            /* Bar when mouse is on */
             .bar:hover {
                 fill: rgb(116, 169, 207);
             }
@@ -47,11 +51,12 @@
     </head>
     <body>
         <script type="text/javascript">
+            // add name, student number and more info to body using d3
             d3.select("body")
                 .append("h1")
                 .text("Jochem Bruins - 10578811")
                 .style("font-size","34px");
-
+       
             d3.select("body")
                 .append("h2")
                 .text("Data Processing: week 3");
@@ -63,47 +68,48 @@
                 .append("p")
                 .text("Deze grafiek toon het percentage ernstig overgewicht (BMI > 30,0 kg/m2) per provincie. De data komt van het CBS. Zij registreren niet alleen ondergewicht, maar ook normaal- en ondergewicht.");
             
+            // change font to arial
             d3.selectAll("body")
                 .style("font-family", "arial");
-
-            data = []       
+            
+            // get data from json file      
             d3.json("gezondheidsmonitor_overgewicht.json", function(error, data) {
-                dataset = data.data;
+                
+                // store data in variable
+                var dataset = data.data;
 
-
-                console.log(dataset);
-
-                //Width and height
+                // width, height and margins
                 var width = 800;
                 var height = 600;
                 var padding = 12
-                var scale = 20
                 var marginLeft = 60
                 var marginBottom = 100
                 var marginRight = 60
                 var marginTop = 60
 
-                
+                // get distance between the bars
                 var barDist = (width - marginLeft - marginRight) / dataset.length 
 
-
+                // add svg to body
                 var svg = d3.select("body")
                     .append("svg")
                     .attr("width", width)
                     .attr("height", height);
 
+                // get scale for Y axis
                 var y = d3.scale.linear()
                     .domain([0, d3.max(dataset, function(d) { 
                             return +d["ernstig overgewicht"];})])
                     .range([height - marginBottom, 0 + marginTop]);
 
+                // get scale for X axis
                 var x = d3.scale.ordinal()
                     x.domain(dataset.map(function(d) { 
                         return d.provincie; 
                         }))
                     .rangeRoundBands([0 + marginLeft - padding, width -marginRight], 0.1);
    
-                //Define Y axis
+                // define Y axis
                 var yAxis = d3.svg.axis()
                     .scale(y)
                     .orient("left")
@@ -111,11 +117,13 @@
                     .ticks(5)
                     .tickFormat(d => d + "%")
 
+                // define X axis
                 var xAxis = d3.svg.axis()
                     .scale(x)
                     .outerTickSize(2)
                     .orient("bottom");
 
+                // define tip
                 var tip = d3.tip()
                       .attr('class', 'd3-tip')
                       .offset([-10, 0])
@@ -123,33 +131,43 @@
                         return "<span>" + d["ernstig overgewicht"] + "%</span>";
                       });
 
+                // call info for tip
                 svg.call(tip);
 
+                // create rects as bars for the graph
                 var rects = svg.selectAll("rect")
                     .data(dataset)
                     .enter()
                     .append("rect")
                     .attr('class', 'bar')
                     .attr("width", (width - marginLeft - marginRight - padding * dataset.length - 1) / dataset.length  )
+                    
+                    // determine height by value of 'ernstig overgewicht'
                     .attr("height", function(d) {
                             return (height - marginBottom) - y(d["ernstig overgewicht"]);  
                         })
+                    
                     .attr("x", function(d, i) {
                         return marginLeft + (i * barDist);
                         })
+                    
+                    // makes sure that graph is not upside down
                     .attr("y", function(d) {
                         return y(d["ernstig overgewicht"]); 
                         })
+                    
+                    // shows tip when mouse is on bar
                     .on('mouseover', tip.show)
                     .on('mouseout', tip.hide);
 
-                //Create Y axis
+                // create Y axis
                 svg.append("g")
                     .attr("class", "axis")
                     .attr("transform", "translate(" + (marginLeft - 10) + ",0)")
                     .call(yAxis);
 
                 
+                // create X axis
                 svg.append("g")
                     .attr("class", "xAxis")
                     .attr("transform", "translate(0," + (height - marginBottom)  + ")")
@@ -161,16 +179,15 @@
                     .attr("transform", "rotate(45)")
                     .style("text-anchor", "start")
 
-                // source
+                // adds title to the graph
                 var title = svg.append("text")
                     .attr("x", width / 2)
                     .attr("y", marginTop / 2)
                     .text("Percentage ernstig overgewicht per provincie")
                     .style("text-anchor", "middle")
                     .style("font-size", "25px");
-                    // .style("font-weight", "bold");
 
-                
+                // adds border around the graph
                 var borderPath = svg.append("rect")
                     .attr("x", 0)
                     .attr("y", 0)
@@ -181,7 +198,6 @@
                     .style("stroke-width", "1px");    
 
             });
-
         </script>
     </body>
 </html>     
