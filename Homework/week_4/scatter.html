@@ -1,0 +1,30 @@
+<!--Jochem Bruins - 10578811 - draws a scatterplot on a webpage-->
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>Week 4</title>
+	<link rel="stylesheet" type="text/css" href="scatter.css">
+	<script src="https://d3js.org/d3.v4.js"></script>
+	<script type="text/javascript" src="scatter.js"></script>
+	<script src="https://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+</head>
+<body>
+	<h1>Data Processing</h1>
+	<h2>
+		Jochem Bruins - 10578811 </br> Week 4: Werkeloosheid schept vrijetijd? </br> <a href="http://stats.oecd.org">Bron: OECD</a> 
+	</h2>
+	<p>
+		Datasets gebruikt: </br> <a href="http://stats.oecd.org/Index.aspx?DataSetCode=BLI2016">Better Life Index 2016</a> </br> <a href="http://stats.oecd.org/Index.aspx?DataSetCode=KEI">Unemployment</a> </br></br> Dit scatterplot onderzoekt of er een samenhang is tussen de werkeloosheid (percentage) in een land en de tijd men gemiddeld besteed aan vrije tijd en persoonlijke verzorging. Daarbij is de levenstevredenheid uitgedrukt in de kleur en grootte van de cirkel. Ga op de cirkel staat om te zien welk land het is.
+	</p>
+	<div id="option">
+	<p><b>Toon grafiek voor:<b></p>
+	<select id="dropDown" onchange="selectData(value)">
+		<option value="0">Totaal mannen en vrouwen</option>
+		<option value="1">Mannen</option>
+		<option value="2">Vrouwen</option>
+</select>
+	</div>
+
+</body>
+</html>
