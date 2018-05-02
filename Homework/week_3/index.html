@@ -5,6 +5,7 @@
         <title>D3 test</title>
         <script type="text/javascript" src="d3/d3.v3.js"></script>
         <script type="text/javascript" src="d3/d3.tip.v0.6.3.js"></script>
+        <script src="https://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
         <style>
             /* D3 tip. insired by http://bl.ocks.org/Caged/6476579*/
             .d3-tip {
@@ -195,6 +196,14 @@
                     .text("Percentage ernstig overgewicht per provincie")
                     .style("text-anchor", "middle")
                     .style("font-size", "25px");
+
+                 // adds title to the graph
+                var labelX = svg.append("text")
+                    .attr("x", width / 2)
+                    .attr("y" , margin.top / 2)
+                    .text("lol")
+                    .style("text-anchor", "middle")
+                    .style("font-size", "10px");
 
                 // adds border around the graph
                 var borderPath = svg.append("rect")
