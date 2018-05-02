@@ -24,8 +24,8 @@ window.onload = function() {
 function getData() {	
 	
 	// urls to API requests
-	var unemployement = 'http://stats.oecd.org/SDMX-JSON/data/KEI/LRHUTTTT.AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA.ST.A/all?startTime=2016&endTime=2016&dimensionAtObservation=allDimensions&pid=3e7475ec-43a6-4b4a-94c6-c19cb1bbaef9'
-	var betterLife = 'http://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA.SW_LIFS+WL_TNOW.L.TOT+MN+WMN/all?&dimensionAtObservation=allDimensions&pid=3e7475ec-43a6-4b4a-94c6-c19cb1bbaef9'
+	var unemployement = 'https://stats.oecd.org/SDMX-JSON/data/KEI/LRHUTTTT.AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA.ST.A/all?startTime=2016&endTime=2016&dimensionAtObservation=allDimensions&pid=3e7475ec-43a6-4b4a-94c6-c19cb1bbaef9'
+	var betterLife = 'https://stats.oecd.org/SDMX-JSON/data/BLI2016/AUS+AUT+BEL+CAN+CHL+CZE+DNK+EST+FIN+FRA+DEU+GRC+HUN+ISL+IRL+ISR+ITA+JPN+KOR+LVA+LUX+MEX+NLD+NZL+NOR+POL+PRT+SVK+SVN+ESP+SWE+CHE+TUR+GBR+USA.SW_LIFS+WL_TNOW.L.TOT+MN+WMN/all?&dimensionAtObservation=allDimensions&pid=3e7475ec-43a6-4b4a-94c6-c19cb1bbaef9'
 
 	// request both datafiles and wait till both loader
 	d3.queue()
