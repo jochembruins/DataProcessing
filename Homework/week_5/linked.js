@@ -1,9 +1,9 @@
 /*
-* scatter.js
+* linked.js
 *
 * Jochem Bruins - 10578811
 *
-* Loads a scatterplot into scatter.html.
+* Loads a map and line graph into linked.html
 */
 	
 // list that will store all data point
@@ -19,79 +19,91 @@ window.onload = function() {
 
 
 /*
-* Requests the data from the OECD API.
+* Requests the data from own server
 */
 function getData() {	
 	
-	// urls to API requests
+	// path to files
 	var unemployement = 'unemp.json'
 	var health = 'health.json'
 	var ready = []
 
-	// request both datafiles and wait till both loader
+	// request both datafiles and wait till both loaded
 	queue(2)
 	    .defer(d3.json, "unemp.json")
 	    .defer(d3.json, "health.json")
 	    .awaitAll(convertData);
 };	  
 
+/*
+* Converts and merges both datasets
+*/
 function convertData(error, response) {
 	
 	if (error) throw error;
 	
-	// parse text into JSON 
+    // get the data
 	var dataUnemployment = response[0].data
 	var dataHealth = response[1].data
 
-	var dataAlcohol = dataHealth.filter(function(x) {return x.TYPE == "Alcohol consumption"});
+	// devide dataHealth into two files, alcohol and tobacco
+    var dataMain = dataHealth.filter(function(x) {return x.TYPE == "Alcohol consumption"});
 	var dataTobacco = dataHealth.filter(function(x) {return x.TYPE == "Tobacco consumption"});
 
-	dataMain = dataAlcohol
-	dataMain.forEach(function(main) {
-	    var resultTobacco = dataTobacco.filter(function(tobacco) {
+	// merge data if country and year are the same
+    dataMain.forEach(function(main) {
+	    // find arrays that should merge
+        var resultTobacco = dataTobacco.filter(function(tobacco) {
     		return tobacco.COU === main.COU &&
         	tobacco.YEAR === main.YEAR;
 		});
-		if (resultTobacco.length > 0) {
+		// merge amount of tobacco
+        if (resultTobacco.length > 0) {
 			main.TOBACCO = Number(resultTobacco[0].AMOUNT)
-		} else {
+        } else {
 			main.TOBACCO = null
 		};
 		
-		var resultUnemp = dataUnemployment.filter(function(unemp) {
+		// find arrays that should merge
+        var resultUnemp = dataUnemployment.filter(function(unemp) {
     		return unemp.COU === main.COU &&
         	unemp.YEAR === main.YEAR;
 		});
-		if (resultUnemp.length > 0) {
+		// merge unemployement rate
+        if (resultUnemp.length > 0) {
 			main.UNEMPLOYMENT = Number(resultUnemp[0].UNEMPLOYMENT)
 		} else {
 			main.UNEMPLOYMENT = null
 		}
-		main.ALCOHOL = Number(main.AMOUNT)
-		delete main.AMOUNT
+		// convert alcohol to a number
+        main.ALCOHOL = Number(main.AMOUNT)
+		
+        // delete non used of duplicate values
+        delete main.AMOUNT
 		delete main.TYPE
 	});
 	
-	var dataFiltered = dataMain.filter(function(x) {return x.YEAR == "2014"});
-
+    // call function to make line graph
 	makeLine(dataMain)
+
+    // filter data for making the map
+    var dataFiltered = dataMain.filter(function(x) {return x.YEAR == "2014"});
+
+    // call function that makes data ready for the map
 	makeDataMap(dataFiltered)
 };
 
 
 
 /*
-* Draws the plot.
+* Prepares the data for drawing the map
 */
 function makeDataMap(data) {
 
-	// Datamaps expect data in format:
-    // { "USA": { "fillColor": "#42a844", numberOfWhatever: 75},
-    //   "FRA": { "fillColor": "#8dc386", numberOfWhatever: 43 } }
+    // empty dataset to store info to draw map
     var dataset = {};
 
-    // create color palette function
-    // color can be whatever you wish
+    // create color scale for color of countries
 	var ColorScale = d3.scale.linear()
 		.domain([d3.min(data, function(d) { 
 			return Number(d.UNEMPLOYMENT); 
@@ -105,7 +117,6 @@ function makeDataMap(data) {
 
     // fill dataset in appropriate format
     data.forEach(function(item){ //
-        // item example value ["USA", 70]
         var iso = item.COU,
         	valueUnemp = Number(item.UNEMPLOYMENT),
         	valueAlcohol = item.ALCOHOL,
@@ -113,28 +124,34 @@ function makeDataMap(data) {
         dataset[iso] = { cou: item.COU, unemployment: valueUnemp, alcohol: valueAlcohol, tobacco : valueTobacco, fillColor: ColorScale(valueUnemp) };
     });
 
+    // call function that makes the map. 
     makeMap(dataset)
 }
 
-
+/*
+* Draws the map.
+*/
 function makeMap(dataset) {
 	
-	var heightMap = 600
+	// height and width
+    var heightMap = 600
 	var widthMap = 800
 
-	var div = d3.select("#container")
+	// adjust div with height and width
+    var div = d3.select("#container")
 		.style("width", widthMap + 'px')
 		.style("height", heightMap + 'px')
 		.style("position", "relative");
 
 	
-	var map = new Datamap({
+	// draw the map
+    var map = new Datamap({
 		element: document.getElementById('container'),
 		scope: 'world',
 		fills: {
-            defaultFill: 'rgba(230,230,230,0.9)' // Any hex, color name or rgb/rgba value
+            defaultFill: 'rgba(230,230,230,0.9)' 
         },
-		// Zoom in on Africa
+		// Zoom in on Europe
 		setProjection: function(element) {
 			var projection = d3.geo.mercator()
 				.center([8, 53])
@@ -149,15 +166,14 @@ function makeMap(dataset) {
         geographyConfig: {
             borderColor: '#DEDEDE',
             highlightBorderWidth: 1.5,
-            // don't change color on mouse hover
             highlightFillColor: function(geo) {
                 return geo['fillColor'] || '#F5F5F5';
             },
-            // only change border
+            // change border on mouseover
             highlightBorderColor: '#B7B7B7',
             // show desired information in tooltip
             popupTemplate: function(geo, data) {
-                // don't show tooltip if country don't present in dataset
+                // don't show tooltip if country is not in dataset
                 if (!data) { return ; }
                 // tooltip content
                 return ['<div class="hoverinfo">',
@@ -169,30 +185,37 @@ function makeMap(dataset) {
             }
         	
         },
+        // function that return country id user clicked on
         done: function(map) {
       		map.svg.selectAll('.datamaps-subunit').on('click', function(geo) {
         		var localData = map.options.data[geo.id]
         		if (localData && localData.unemployment) {
           			var country = localData.cou
-          			updateLine(country, dataset)
+          			// calls funtion to update line graph
+                    updateLine(country, dataset)
           		}
           	})
         }  	
 	})
 }
 
+/*
+* Draws a line graph from CZE
+*/
 function makeLine(data) {
 
-	dataCountry = dataMain.filter(function(x) {return x.COU == "CZE"});
+	// filters data for country
+    dataCountry = dataMain.filter(function(x) {return x.COU == "CZE"});
 
-	var heightDiv = 200
+	// height, width and margins
+    var heightDiv = 200
 	var widthDiv = 800
-	
     var margin = {top: 20, right: 30, bottom: 30, left: 30};
     var height = heightDiv - margin.top - margin.bottom;
     var width = widthDiv - margin.left - margin.right;
 
-	var svg = d3.select("#container2")
+	// add svg to div
+    var svg = d3.select("#container2")
 		.append("svg")
 		.attr("class", "linegraph")
     	.attr("width", width + margin.left + margin.right)
@@ -200,29 +223,32 @@ function makeLine(data) {
   		.append("g")
     		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     
+    // convert time for x axis
     var parseTime = d3.time.format("%Y").parse;
-    
     dataCountry.forEach(function(d) {
       		d.YEAR = parseTime(d.YEAR);
     })
 
-   
+   // get range and domain for x-axis
     x = d3.time.scale()
     			.range([0, width])
     			.domain(d3.extent(dataCountry, function(d) { return d.YEAR; }));
 	
-	// Define the axes
+	// define the axes
 	xAxis = d3.svg.axis().scale(x)
 	    			.orient("bottom")
 	    			.ticks(16)
 	    			.tickSize(-height, 0, 0)
 
-	svg.append("g")
+	// add axis to graph
+    svg.append("g")
 		.attr("class", "axis") 
 		.call(xAxis)
 		.attr("transform", "translate(0," + (height) + ")");
 	
-	y1 = d3.scale.linear()
+	
+    // define range and domain for y-axis for all three lines
+    y1 = d3.scale.linear()
 				.range([height, 0])
 				.domain([0, d3.max(dataCountry, function(d) { return d.UNEMPLOYMENT; })]);
 
@@ -235,7 +261,8 @@ function makeLine(data) {
 				.domain([0, d3.max(dataCountry, function(d) { return d.TOBACCO; })]);
 	    			       		
 
-   	line1 = d3.svg.line()
+   	// Define the three lines
+    line1 = d3.svg.line()
     			.x(function(d) { return x(d.YEAR); })
     			.y(function(d) { return y1(d.UNEMPLOYMENT); });
 
@@ -247,6 +274,7 @@ function makeLine(data) {
     			.x(function(d) { return x(d.YEAR); })
     			.y(function(d) { return y3(d.TOBACCO); });
 
+    // append lines to scvg
     svg.append("path")
     	.attr("d", line1(dataCountry))
     	.attr("class", "line1");
@@ -263,10 +291,15 @@ function makeLine(data) {
 
 }
 
+/*
+* Updates line when clicked on a country
+*/
 function updateLine(country, data) {
 
+    // filter data for country
     dataCountry = dataMain.filter(function(data) {return data.COU == country})
     console.log(dataCountry)
+    // update domains if data is available
     if (dataCountry){
     	
 
@@ -280,26 +313,19 @@ function updateLine(country, data) {
 
     }
 
-        // // Scale the range of the data again
-        // x.domain(d3.extent(data, function(d) { return d.UNEMPLOYMENT; }));
-        // y1.domain([0, d3.max(data, function(d) { return d.close; })]);
-    
-
-
-    // Select the section we want to apply our changes to
+    // select svg
     var svg = d3.select("body").transition();
-
-    // Make the changes
-    svg.select(".line1")   // change the line
+    // update the lines and the x-axis.
+    svg.select(".line1")  
         .duration(750)
         .attr("d", line1(dataCountry));
-    svg.select(".line2")   // change the line
+    svg.select(".line2")   
         .duration(750)
         .attr("d", line2(dataCountry));
-    svg.select(".line3")   // change the line
+    svg.select(".line3")
         .duration(750)
         .attr("d", line3(dataCountry));
-    svg.select("axis") // change the x axis
+    svg.select("axis") /
         .duration(750)
         .call(xAxis);
 
