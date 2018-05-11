@@ -47,7 +47,7 @@ function convertData(error, response) {
 	var dataHealth = response[1].data
 
 	// devide dataHealth into two files, alcohol and tobacco
-    var dataMain = dataHealth.filter(function(x) {return x.TYPE == "Alcohol consumption"});
+    dataMain = dataHealth.filter(function(x) {return x.TYPE == "Alcohol consumption"});
 	var dataTobacco = dataHealth.filter(function(x) {return x.TYPE == "Tobacco consumption"});
 
 	// merge data if country and year are the same
@@ -84,7 +84,7 @@ function convertData(error, response) {
 	});
 	
     // call function to make line graph
-	makeLine(dataMain)
+	makeLine()
 
     // filter data for making the map
     var dataFiltered = dataMain.filter(function(x) {return x.YEAR == "2014"});
@@ -192,7 +192,7 @@ function makeMap(dataset) {
         		if (localData && localData.unemployment) {
           			var country = localData.cou
           			// calls funtion to update line graph
-                    updateLine(country, dataset)
+                    updateLine(country)
           		}
           	})
         }  	
@@ -202,7 +202,7 @@ function makeMap(dataset) {
 /*
 * Draws a line graph from CZE
 */
-function makeLine(data) {
+function makeLine() {
 
 	// filters data for country
     dataCountry = dataMain.filter(function(x) {return x.COU == "CZE"});
@@ -294,7 +294,7 @@ function makeLine(data) {
 /*
 * Updates line when clicked on a country
 */
-function updateLine(country, data) {
+function updateLine(country) {
 
     // filter data for country
     dataCountry = dataMain.filter(function(data) {return data.COU == country})
@@ -325,7 +325,7 @@ function updateLine(country, data) {
     svg.select(".line3")
         .duration(750)
         .attr("d", line3(dataCountry));
-    svg.select("axis") /
+    svg.select("axis") 
         .duration(750)
         .call(xAxis);
 
