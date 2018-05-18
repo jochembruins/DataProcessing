@@ -19,12 +19,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-	<div class="container-fluid">
+	<div class="container">
 		<div class="jumbotron">
-			<h2>Unemployement causes unhealthy lifestyle?</h2>
+			<h2>Unemployment causes unhealthy lifestyle?</h2>
 			<h3>Jochem Bruins - Dataprocessing</h3> 
 			<h4>Week 5 - Linked view</h4>     
 			<p>Data sets used: </br> <a href="http://stats.oecd.org/Index.aspx?DataSetCode=HEALTH_LVNG">Healthy living (OECD)</a> </br> <a href="http://stats.oecd.org/Index.aspx?DataSetCode=KEI">Unemployment (OECD)</a></p>
+			<p>Does unemployment cause an unhealthy lifestyle? This visualization tries to give a data-based answer to that question. In the map we see the unemployment rates in Europa. Hover over the countries to see the actual numbers. Click on one to see how the unemployment develops in comparison with tobacco and alcohol consumption over the years. </br> Looking at the graphs will show you that in quite some countries a decrease in unemployment came together with an increase in alcohol and tobacco consumption. Maybe it’s the money that makes an unhealthier life more accessible? Please play around and draw your own conclusions!</p>	
 		</div>
 		<h5>Select year to be shown in map</h5>
 		<input id="slider" class="slider-horizontal" type="range" name="range" min="2000" max="2014" value="2014"oninput="updateMap(this.value)">

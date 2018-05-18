@@ -139,7 +139,7 @@ function makeMap(dataset) {
 	
 	// height and width
 	var heightMap = 600;
-	var widthMap = 800;
+	var widthMap = 1140;
 
 	// adjust div with height and width
 	var div = d3.select("#containermap")
@@ -159,7 +159,7 @@ function makeMap(dataset) {
 		setProjection: function(element) {
 			var projection = d3.geo.mercator()
 				.center([8, 53])
-				.scale(widthMap / 1.3)
+				.scale(widthMap / 1.8)
 				.translate([widthMap / 2, heightMap / 2]);
 			var path = d3.geo.path()
 				.projection(projection);
@@ -259,7 +259,7 @@ function makeLine(dataLine) {
 	
 	// height, width and margins
 	var heightDiv = 250
-	var widthDiv = 800
+	var widthDiv = 1140
 	var margin = {top: 40, right: 30, bottom: 30, left: 30};
 	height = heightDiv - margin.top - margin.bottom;
 	width = widthDiv - margin.left - margin.right;
