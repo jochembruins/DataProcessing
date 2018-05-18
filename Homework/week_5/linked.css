@@ -6,8 +6,20 @@
 * adds style to linked.html
 */
 
+
+html, body {
+    height: 100%;
+    font-family: "Helvetica Neue";
+}
+
 html {
-	font-family: Arial;
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
 }
 
 path {
@@ -16,24 +28,40 @@ path {
 }
 
 .linegraph {
-	background-color: rgb(230, 230, 230);
+	background-color: rgb(245, 245, 245);
 }
 
-.line1 {
+.lineUnemp {
 	stroke: #91bfdb;
 }
 
-.line2 {
+.lineAlcohol {
 	stroke: #ffffbf;
 }
 
-.line3 {
+.lineTobacco {
 	stroke: #fc8d59;
 }
 
+.tooltipline {
+	stroke: rgb(210, 210, 210);
+	stroke-width: 2.5px;
+}
+
+#tooltip {
+	background-color: white;
+	border: 1px solid black;
+	padding:5px;
+	font-family: "Helvetica Neue";
+	font-size:12px;
+	box-shadow: 1px 1px 5px #CCC;
+}
+
+
+
 .axis line,
 .axis path {
-  stroke: rgba(255, 255, 255, 0.6);
+  stroke: rgba(210, 210, 210, 0.6);
   stroke-width: 0.8;
 }
 
@@ -41,4 +69,6 @@ path {
 	fill: rgb(106, 156, 192);
 	font-size: 11px;
 }
+
+
 
